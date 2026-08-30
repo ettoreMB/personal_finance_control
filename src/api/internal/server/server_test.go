@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 
@@ -40,7 +41,7 @@ func newTestApp(t *testing.T, opts ...func(*config.Config)) *fiber.App {
 		t.Fatalf("unexpected error connecting to db: %v", err)
 	}
 
-	cfg := config.Config{SQLitePath: dbPath}
+	cfg := config.Config{SQLitePath: dbPath, SessionTTL: 30 * 24 * time.Hour}
 	for _, opt := range opts {
 		opt(&cfg)
 	}
