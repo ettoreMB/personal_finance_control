@@ -11,10 +11,10 @@ Status possíveis: `Não iniciado` · `Em andamento` · `Em revisão (PR aberto)
 | Feature | Status | Branch | PR | Data |
 |---|---|---|---|---|
 | Setup do repositório (estrutura API + Front, Taskfile, CI base) | Concluído | `feat/setup-fundacao` | [#5](https://github.com/ettoreMB/personal_finance_control/pull/5) | 2026-08-30 |
-| Setup da API (Fiber, GORM, golang-migrate, slog, Air) | Não iniciado | | | |
-| Setup do Front (Next.js, Tailwind v4, shadcn/ui) | Não iniciado | | | |
-| Design do schema do banco de dados (SQLite, normalizado) | Não iniciado | | | |
-| Criação dos arquivos de docker compose | Não iniciado | | | |
+| Setup da API (Fiber, GORM, golang-migrate, slog, Air) | Concluído | `feat/fase0-restante` | [#13](https://github.com/ettoreMB/personal_finance_control/pull/13) | 2026-08-30 |
+| Setup do Front (Next.js, Tailwind v4, shadcn/ui) | Concluído | `feat/fase0-restante` | [#13](https://github.com/ettoreMB/personal_finance_control/pull/13) | 2026-08-30 |
+| Design do schema do banco de dados (SQLite, normalizado) | Concluído | `feat/fase0-restante` | [#13](https://github.com/ettoreMB/personal_finance_control/pull/13) | 2026-08-30 |
+| Criação dos arquivos de docker compose | Concluído | `feat/fase0-restante` | [#13](https://github.com/ettoreMB/personal_finance_control/pull/13) | 2026-08-30 |
 
 ## Fase 1 — Autenticação
 
