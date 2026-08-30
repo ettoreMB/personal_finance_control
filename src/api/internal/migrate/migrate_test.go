@@ -36,13 +36,36 @@ func TestUpCreatesSchemaAndSeedsCategories(t *testing.T) {
 	}
 	defer conn.Close()
 
-	for _, table := range []string{"users", "categories", "entries"} {
+	for _, table := range []string{"users", "categories", "entries", "sessions"} {
 		var name string
 		if err := conn.QueryRow(
 			"SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?", table,
 		).Scan(&name); err != nil {
 			t.Fatalf("expected table %q to exist: %v", table, err)
 		}
+	}
+
+	userColumns, err := conn.Query("PRAGMA table_info(users)")
+	if err != nil {
+		t.Fatalf("unexpected error querying users columns: %v", err)
+	}
+	defer userColumns.Close()
+
+	hasCPF := false
+	for userColumns.Next() {
+		var cid int
+		var name, colType string
+		var notNull, pk int
+		var dfltValue any
+		if err := userColumns.Scan(&cid, &name, &colType, &notNull, &dfltValue, &pk); err != nil {
+			t.Fatalf("unexpected error scanning users column: %v", err)
+		}
+		if name == "cpf" {
+			hasCPF = true
+		}
+	}
+	if !hasCPF {
+		t.Fatal("expected users table to have a cpf column")
 	}
 
 	rows, err := conn.Query("SELECT name FROM categories ORDER BY name")
@@ -83,7 +106,7 @@ func TestDownReversesSchemaAndSeed(t *testing.T) {
 	}
 	defer conn.Close()
 
-	for _, table := range []string{"users", "categories", "entries"} {
+	for _, table := range []string{"users", "categories", "entries", "sessions"} {
 		var name string
 		err := conn.QueryRow(
 			"SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?", table,
