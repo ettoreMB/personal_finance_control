@@ -1,0 +1,21 @@
+services:
+  api:
+    build:
+      context: ./src/api
+    ports:
+      - "3000:3000"
+    environment:
+      SQLITE_PATH: /data/app.db
+    volumes:
+      - sqlite-data:/data
+
+  front:
+    build:
+      context: ./src/front
+    ports:
+      - "3001:3000"
+    depends_on:
+      - api
+
+volumes:
+  sqlite-data:
