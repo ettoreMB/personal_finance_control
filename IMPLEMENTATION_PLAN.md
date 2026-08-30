@@ -14,6 +14,7 @@ Status possíveis: `Não iniciado` · `Em andamento` · `Em revisão (PR aberto)
 | Setup da API (Fiber, GORM, golang-migrate, slog, Air) | Não iniciado | | | |
 | Setup do Front (Next.js, Tailwind v4, shadcn/ui) | Não iniciado | | | |
 | Design do schema do banco de dados (SQLite, normalizado) | Não iniciado | | | |
+| Criação dos arquivos de docker compose | Não iniciado | | | |
 
 ## Fase 1 — Autenticação
 
