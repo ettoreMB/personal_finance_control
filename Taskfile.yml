@@ -1,0 +1,50 @@
+version: "3"
+
+tasks:
+  dev:api:
+    desc: Run the API locally with hot reload (Air)
+    dir: api
+    cmds:
+      - air
+
+  dev:front:
+    desc: Run the Front locally
+    dir: front
+    cmds:
+      - npm run dev
+
+  test:api:
+    desc: Run API tests
+    dir: api
+    cmds:
+      - go test ./...
+
+  test:front:
+    desc: Run Front tests
+    dir: front
+    cmds:
+      - npm test
+
+  build:api:
+    desc: Build the API binary
+    dir: api
+    cmds:
+      - go build ./...
+
+  build:front:
+    desc: Build the Front for production
+    dir: front
+    cmds:
+      - npm run build
+
+  migrate:up:
+    desc: Apply database migrations
+    dir: api
+    cmds:
+      - migrate -path migrations -database "sqlite3://$(SQLITE_PATH)" up
+
+  migrate:down:
+    desc: Revert the last database migration
+    dir: api
+    cmds:
+      - migrate -path migrations -database "sqlite3://$(SQLITE_PATH)" down 1
