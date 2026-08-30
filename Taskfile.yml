@@ -41,10 +41,10 @@ tasks:
     desc: Apply database migrations
     dir: api
     cmds:
-      - migrate -path migrations -database "sqlite3://$(SQLITE_PATH)" up
+      - migrate -path migrations -database "sqlite3://$SQLITE_PATH" up
 
   migrate:down:
     desc: Revert the last database migration
     dir: api
     cmds:
-      - migrate -path migrations -database "sqlite3://$(SQLITE_PATH)" down 1
+      - migrate -path migrations -database "sqlite3://$SQLITE_PATH" down 1
