@@ -17,6 +17,7 @@ func New(db *gorm.DB, cfg config.Config) *fiber.App {
 	app.Post("/register", registerHandler(db))
 	app.Post("/login", loginHandler(db, cfg))
 	app.Post("/logout", logoutHandler(db, cfg))
+	app.Post("/auth/recovery", recoveryHandler(db, cfg))
 
 	return app
 }

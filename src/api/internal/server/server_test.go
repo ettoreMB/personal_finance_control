@@ -26,7 +26,7 @@ func migrationsDir(t *testing.T) string {
 	return filepath.Join(filepath.Dir(file), "..", "..", "migrations")
 }
 
-func newTestApp(t *testing.T) *fiber.App {
+func newTestApp(t *testing.T, opts ...func(*config.Config)) *fiber.App {
 	t.Helper()
 
 	dbPath := filepath.Join(t.TempDir(), "test.sqlite")
@@ -40,7 +40,12 @@ func newTestApp(t *testing.T) *fiber.App {
 		t.Fatalf("unexpected error connecting to db: %v", err)
 	}
 
-	return server.New(conn, config.Config{SQLitePath: dbPath})
+	cfg := config.Config{SQLitePath: dbPath}
+	for _, opt := range opts {
+		opt(&cfg)
+	}
+
+	return server.New(conn, cfg)
 }
 
 func TestHealthzReturnsOK(t *testing.T) {
