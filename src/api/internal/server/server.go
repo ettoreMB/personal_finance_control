@@ -14,5 +14,7 @@ func New(db *gorm.DB, cfg config.Config) *fiber.App {
 		return c.JSON(fiber.Map{"status": "ok"})
 	})
 
+	app.Post("/register", registerHandler(db))
+
 	return app
 }
