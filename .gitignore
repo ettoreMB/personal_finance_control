@@ -2,7 +2,7 @@
 .rtk/
 
 # API (Go)
-/api/api
+/api/bin/
 /api/tmp/
 *.sqlite
 *.sqlite3
