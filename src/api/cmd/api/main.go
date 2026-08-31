@@ -12,12 +12,13 @@ import (
 func main() {
 	cfg := config.Load()
 
-	if _, err := db.Connect(cfg.SQLitePath); err != nil {
+	conn, err := db.Connect(cfg.SQLitePath)
+	if err != nil {
 		slog.Error("failed to connect to database", "error", err)
 		os.Exit(1)
 	}
 
-	app := server.New()
+	app := server.New(conn, cfg)
 
 	if err := app.Listen(":3000"); err != nil {
 		slog.Error("server stopped", "error", err)

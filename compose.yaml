@@ -6,6 +6,8 @@ services:
       - "3000:3000"
     environment:
       SQLITE_PATH: /data/app.db
+      RECOVERY_SECRET: ${RECOVERY_SECRET:-}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
     volumes:
       - sqlite-data:/data
 
@@ -14,6 +16,8 @@ services:
       context: ./src/front
     ports:
       - "3001:3000"
+    environment:
+      API_URL: http://api:3000
     depends_on:
       - api
 
