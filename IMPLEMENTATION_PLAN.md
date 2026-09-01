@@ -20,10 +20,10 @@ Status possíveis: `Não iniciado` · `Em andamento` · `Em revisão (PR aberto)
 
 | Feature | Status | Branch | PR | Data |
 |---|---|---|---|---|
-| Endpoint + tela de criação de usuário (registro único) | Não iniciado | | | |
-| Login com sessão via cookie httpOnly | Não iniciado | | | |
-| Middleware de proteção de rotas (API) e redirecionamento de telas não autenticadas (Front) | Não iniciado | | | |
-| Rota de recuperação de senha protegida por `RECOVERY_SECRET` | Não iniciado | | | |
+| Endpoint + tela de criação de usuário (registro único) | Concluído | `feat/fase1-autenticacao` | [#21](https://github.com/ettoreMB/personal_finance_control/pull/21) | 2026-08-30 |
+| Login com sessão via cookie httpOnly | Concluído | `feat/fase1-autenticacao` | [#21](https://github.com/ettoreMB/personal_finance_control/pull/21) | 2026-08-30 |
+| Middleware de proteção de rotas (API) e redirecionamento de telas não autenticadas (Front) | Concluído | `feat/fase1-autenticacao` | [#21](https://github.com/ettoreMB/personal_finance_control/pull/21) | 2026-08-30 |
+| Rota de recuperação de senha protegida por `RECOVERY_SECRET` | Concluído | `feat/fase1-autenticacao` | [#21](https://github.com/ettoreMB/personal_finance_control/pull/21) | 2026-08-30 |
 
 ## Fase 2 — Core: lançamentos e categorias
 

@@ -6,6 +6,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.52.15
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/mattn/go-sqlite3 v1.14.22
+	golang.org/x/crypto v0.55.0
 	gorm.io/driver/sqlite v1.6.0
 	gorm.io/gorm v1.31.2
 )
@@ -23,7 +24,6 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.51.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
-	golang.org/x/crypto v0.55.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.41.0 // indirect
 )

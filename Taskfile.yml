@@ -48,3 +48,13 @@ tasks:
     dir: src/api
     cmds:
       - migrate -path migrations -database "sqlite3://$SQLITE_PATH" down 1
+
+  docker:up:
+    desc: Run API and Front together via Docker Compose
+    cmds:
+      - docker compose up --build
+
+  docker:down:
+    desc: Stop and remove the Docker Compose services
+    cmds:
+      - docker compose down
