@@ -20,5 +20,20 @@ export default async function ProtectedLayout({
     redirect("/login");
   }
 
-  return <>{children}</>;
+  return (
+    <div className="flex min-h-full flex-col">
+      <nav className="flex gap-4 border-b px-6 py-3">
+        <a href="/dashboard" className="underline">
+          Painel
+        </a>
+        <a href="/categories" className="underline">
+          Categorias
+        </a>
+        <a href="/entries" className="underline">
+          Lançamentos
+        </a>
+      </nav>
+      {children}
+    </div>
+  );
 }
