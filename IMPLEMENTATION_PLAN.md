@@ -20,19 +20,19 @@ Status possíveis: `Não iniciado` · `Em andamento` · `Em revisão (PR aberto)
 
 | Feature | Status | Branch | PR | Data |
 |---|---|---|---|---|
-| Endpoint + tela de criação de usuário (registro único) | Não iniciado | | | |
-| Login com sessão via cookie httpOnly | Não iniciado | | | |
-| Middleware de proteção de rotas (API) e redirecionamento de telas não autenticadas (Front) | Não iniciado | | | |
-| Rota de recuperação de senha protegida por `RECOVERY_SECRET` | Não iniciado | | | |
+| Endpoint + tela de criação de usuário (registro único) | Concluído | `feat/fase1-autenticacao` | [#21](https://github.com/ettoreMB/personal_finance_control/pull/21) | 2026-08-31 |
+| Login com sessão via cookie httpOnly | Concluído | `feat/fase1-autenticacao` | [#21](https://github.com/ettoreMB/personal_finance_control/pull/21) | 2026-08-31 |
+| Middleware de proteção de rotas (API) e redirecionamento de telas não autenticadas (Front) | Concluído | `feat/fase1-autenticacao` | [#21](https://github.com/ettoreMB/personal_finance_control/pull/21) | 2026-08-31 |
+| Rota de recuperação de senha protegida por `RECOVERY_SECRET` | Concluído | `feat/fase1-autenticacao` | [#21](https://github.com/ettoreMB/personal_finance_control/pull/21) | 2026-08-31 |
 
 ## Fase 2 — Core: lançamentos e categorias
 
 | Feature | Status | Branch | PR | Data |
 |---|---|---|---|---|
-| Seed automático das categorias iniciais (casa, carro, comida, lazer) via migration | Não iniciado | | | |
-| CRUD de categorias (exclusão bloqueada se houver lançamentos vinculados) | Não iniciado | | | |
-| CRUD de lançamentos avulsos (ganho/gasto), edição livre sem restrição de "mês fechado" | Não iniciado | | | |
-| Reclassificação de categoria em lançamentos existentes | Não iniciado | | | |
+| Seed automático das categorias iniciais (casa, carro, comida, lazer) via migration | Concluído | `feat/fase0-restante` | [#13](https://github.com/ettoreMB/personal_finance_control/pull/13) | 2026-08-30 |
+| CRUD de categorias (exclusão bloqueada se houver lançamentos vinculados) | Concluído | `feat/lancamentos-e-categorias` | [#27](https://github.com/ettoreMB/personal_finance_control/pull/27) | 2026-09-14 |
+| CRUD de lançamentos avulsos (ganho/gasto), edição livre sem restrição de "mês fechado" | Concluído | `feat/lancamentos-e-categorias` | [#27](https://github.com/ettoreMB/personal_finance_control/pull/27) | 2026-09-14 |
+| Reclassificação de categoria em lançamentos existentes | Concluído | `feat/lancamentos-e-categorias` | [#27](https://github.com/ettoreMB/personal_finance_control/pull/27) | 2026-09-14 |
 
 ## Fase 3 — Cartão de crédito parcelado
 
