@@ -1,6 +1,11 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import {
+  formatReaisFromCents,
+  maskReaisInput,
+  parseReaisToCents,
+} from "@/lib/money";
 
 type Category = {
   id: number;
@@ -29,15 +34,6 @@ type Purchase = {
 
 function formatBRL(cents: number): string {
   return `R$ ${(cents / 100).toFixed(2).replace(".", ",")}`;
-}
-
-function parseReaisToCents(raw: string): number {
-  const normalized = raw.trim().replace(",", ".");
-  const value = Number(normalized);
-  if (!Number.isFinite(value)) {
-    return 0;
-  }
-  return Math.round(value * 100);
 }
 
 export default function PurchasesPage() {
@@ -113,7 +109,7 @@ export default function PurchasesPage() {
   function startEdit(purchase: Purchase) {
     setEditingId(purchase.id);
     setEditDescription(purchase.description);
-    setEditAmount((purchase.amount_cents / 100).toFixed(2).replace(".", ","));
+    setEditAmount(formatReaisFromCents(purchase.amount_cents));
     setEditCategoryId(String(purchase.category_id));
     setError(null);
   }
@@ -193,9 +189,10 @@ export default function PurchasesPage() {
           Valor
           <input
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(e) => setAmount(maskReaisInput(e.target.value))}
             className="rounded border px-3 py-2"
-            inputMode="decimal"
+            inputMode="numeric"
+            autoComplete="off"
           />
         </label>
         <label className="flex flex-col gap-1">
@@ -255,9 +252,10 @@ export default function PurchasesPage() {
                     Valor
                     <input
                       value={editAmount}
-                      onChange={(e) => setEditAmount(e.target.value)}
+                      onChange={(e) => setEditAmount(maskReaisInput(e.target.value))}
                       className="rounded border px-3 py-2"
-                      inputMode="decimal"
+                      inputMode="numeric"
+                      autoComplete="off"
                     />
                   </label>
                   <label className="flex flex-col gap-1">

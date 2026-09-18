@@ -18,8 +18,14 @@ services:
       - "3001:3000"
     environment:
       API_URL: http://api:3000
+      WATCHPACK_POLLING: "true"
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./src/front:/app
+      - front-node-modules:/app/node_modules
     depends_on:
       - api
 
 volumes:
   sqlite-data:
+  front-node-modules:

@@ -1,6 +1,15 @@
 version: "3"
 
 tasks:
+  docker:up:
+    desc: Run docker compose file
+    cmds:
+      - docker compose up -d
+  docker:down:
+    desc: Shutdown docker containers
+    cmds:
+      - docker compose down
+
   dev:api:
     desc: Run the API locally with hot reload (Air)
     dir: src/api

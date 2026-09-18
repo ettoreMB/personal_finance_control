@@ -6,6 +6,11 @@ import {
   tableFeatures,
   useTable,
 } from "@tanstack/react-table";
+import {
+  formatReaisFromCents,
+  maskReaisInput,
+  parseReaisToCents,
+} from "@/lib/money";
 
 type Category = {
   id: number;
@@ -59,15 +64,6 @@ const EMPTY_ENTRIES: Entry[] = [];
 
 function formatBRL(cents: number): string {
   return `R$ ${(cents / 100).toFixed(2).replace(".", ",")}`;
-}
-
-function parseReaisToCents(raw: string): number {
-  const normalized = raw.trim().replace(",", ".");
-  const value = Number(normalized);
-  if (!Number.isFinite(value)) {
-    return 0;
-  }
-  return Math.round(value * 100);
 }
 
 export default function EntriesPage() {
@@ -124,7 +120,7 @@ export default function EntriesPage() {
   function startEdit(entry: Entry) {
     setEditingId(entry.id);
     setType(entry.type);
-    setAmount((entry.amount_cents / 100).toFixed(2).replace(".", ","));
+    setAmount(formatReaisFromCents(entry.amount_cents));
     setDate(entry.entry_date);
     setCategoryId(String(entry.category_id));
     setError(null);
@@ -201,9 +197,10 @@ export default function EntriesPage() {
           Valor
           <input
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(e) => setAmount(maskReaisInput(e.target.value))}
             className="rounded border px-3 py-2"
-            inputMode="decimal"
+            inputMode="numeric"
+            autoComplete="off"
           />
         </label>
         <label className="flex flex-col gap-1">

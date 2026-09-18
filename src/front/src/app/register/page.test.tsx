@@ -3,9 +3,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import RegisterPage from "./page";
 
+const pushMock = vi.fn();
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: pushMock }),
+}));
+
 describe("RegisterPage", () => {
   beforeEach(() => {
     vi.stubGlobal("fetch", vi.fn());
+    pushMock.mockClear();
   });
 
   it("renders the registration form", () => {
@@ -48,9 +55,10 @@ describe("RegisterPage", () => {
       "/api/register",
       expect.objectContaining({ method: "POST" }),
     );
+    expect(pushMock).not.toHaveBeenCalled();
   });
 
-  it("shows a success message when the API call succeeds", async () => {
+  it("redirects to login when the API call succeeds", async () => {
     vi.mocked(fetch).mockResolvedValueOnce(
       new Response(JSON.stringify({ id: 1 }), { status: 201 }),
     );
@@ -73,9 +81,7 @@ describe("RegisterPage", () => {
     fireEvent.click(screen.getByRole("button", { name: /cadastrar/i }));
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/cadastro realizado com sucesso/i),
-      ).toBeInTheDocument();
+      expect(pushMock).toHaveBeenCalledWith("/login");
     });
   });
 });

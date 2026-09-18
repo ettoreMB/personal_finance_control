@@ -1,11 +1,9 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 const cookiesMock = vi.fn();
-const headersMock = vi.fn();
 
 vi.mock("next/headers", () => ({
   cookies: () => cookiesMock(),
-  headers: () => headersMock(),
 }));
 
 import ProtectedLayout from "./layout";
@@ -14,7 +12,6 @@ describe("ProtectedLayout", () => {
   beforeEach(() => {
     vi.stubGlobal("fetch", vi.fn());
     cookiesMock.mockResolvedValue({ toString: () => "session=abc" });
-    headersMock.mockResolvedValue(new Map([["host", "localhost:3001"]]));
   });
 
   it("renders children when /me succeeds", async () => {
@@ -24,7 +21,7 @@ describe("ProtectedLayout", () => {
 
     expect(result).toBeTruthy();
     expect(fetch).toHaveBeenCalledWith(
-      "http://localhost:3001/api/me",
+      "http://localhost:3000/me",
       expect.objectContaining({ headers: { Cookie: "session=abc" } }),
     );
   });

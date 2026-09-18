@@ -46,7 +46,7 @@ describe("LoginPage", () => {
     expect(pushMock).not.toHaveBeenCalled();
   });
 
-  it("redirects home on successful login", async () => {
+  it("redirects to the dashboard on successful login", async () => {
     vi.mocked(fetch).mockResolvedValueOnce(
       new Response(JSON.stringify({ id: 1 }), { status: 200 }),
     );
@@ -63,7 +63,7 @@ describe("LoginPage", () => {
     fireEvent.click(screen.getByRole("button", { name: /entrar/i }));
 
     await waitFor(() => {
-      expect(pushMock).toHaveBeenCalledWith("/");
+      expect(pushMock).toHaveBeenCalledWith("/dashboard");
     });
   });
 });

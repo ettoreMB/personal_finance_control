@@ -1,19 +1,19 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [cpf, setCpf] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
-    setSuccess(false);
 
     const response = await fetch("/api/register", {
       method: "POST",
@@ -32,7 +32,7 @@ export default function RegisterPage() {
       return;
     }
 
-    setSuccess(true);
+    router.push("/login");
   }
 
   return (
@@ -88,9 +88,6 @@ export default function RegisterPage() {
         </label>
 
         {error && <p className="text-red-600">{error}</p>}
-        {success && (
-          <p className="text-green-600">Cadastro realizado com sucesso.</p>
-        )}
 
         <button
           type="submit"
