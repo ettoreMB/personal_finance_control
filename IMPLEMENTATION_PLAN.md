@@ -38,9 +38,9 @@ Status possíveis: `Não iniciado` · `Em andamento` · `Em revisão (PR aberto)
 
 | Feature | Status | Branch | PR | Data |
 |---|---|---|---|---|
-| Registro de compra parcelada e geração das parcelas mensais | Não iniciado | | | |
-| Edição/exclusão da compra original (parcelas passadas intocadas, só futuras mudam) | Não iniciado | | | |
-| Cancelamento de parcelas futuras via soft delete (para "trocar" o valor total de uma compra) | Não iniciado | | | |
+| Registro de compra parcelada e geração das parcelas mensais | Concluído | `feat/cartao-parcelado` | [#33](https://github.com/ettoreMB/personal_finance_control/pull/33) | 2026-09-18 |
+| Edição da Compra (descrição, categoria e valor restante; valor/data de parcelas de mês passado intocados) | Concluído | `feat/cartao-parcelado` | [#33](https://github.com/ettoreMB/personal_finance_control/pull/33) | 2026-09-18 |
+| Desfazer a Compra no mês (soft delete da Compra e das N parcelas; bloqueado se alguma parcela já caiu em mês passado) | Concluído | `feat/cartao-parcelado` | [#33](https://github.com/ettoreMB/personal_finance_control/pull/33) | 2026-09-18 |
 
 ## Fase 4 — Visualizações
 
