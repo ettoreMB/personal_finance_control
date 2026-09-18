@@ -36,7 +36,7 @@ func TestUpCreatesSchemaAndSeedsCategories(t *testing.T) {
 	}
 	defer conn.Close()
 
-	for _, table := range []string{"users", "categories", "entries", "sessions"} {
+	for _, table := range []string{"users", "categories", "entries", "sessions", "purchases"} {
 		var name string
 		if err := conn.QueryRow(
 			"SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?", table,
@@ -106,7 +106,7 @@ func TestDownReversesSchemaAndSeed(t *testing.T) {
 	}
 	defer conn.Close()
 
-	for _, table := range []string{"users", "categories", "entries", "sessions"} {
+	for _, table := range []string{"users", "categories", "entries", "sessions", "purchases"} {
 		var name string
 		err := conn.QueryRow(
 			"SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?", table,

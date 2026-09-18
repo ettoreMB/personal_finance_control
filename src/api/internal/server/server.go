@@ -34,5 +34,11 @@ func New(db *gorm.DB, cfg config.Config) *fiber.App {
 	app.Patch("/entries/:id", updateEntryHandler(db))
 	app.Delete("/entries/:id", deleteEntryHandler(db))
 
+	app.Get("/purchases", listPurchasesHandler(db))
+	app.Post("/purchases", createPurchaseHandler(db))
+	app.Get("/purchases/:id", getPurchaseHandler(db))
+	app.Patch("/purchases/:id", updatePurchaseHandler(db))
+	app.Delete("/purchases/:id", deletePurchaseHandler(db))
+
 	return app
 }

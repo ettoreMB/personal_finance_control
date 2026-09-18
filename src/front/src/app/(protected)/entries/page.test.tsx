@@ -195,6 +195,34 @@ describe("EntriesPage", () => {
     expect(screen.getByRole("cell", { name: "comida" })).toBeInTheDocument();
   });
 
+  it("shows parcela label and hides edit/delete for installment rows", async () => {
+    const parcela = {
+      ...createdEntry,
+      purchase_id: 9,
+      installment_number: 2,
+      purchase: { id: 9, description: "TV Samsung", installment_count: 6 },
+    };
+
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url === "/api/categories") {
+        return new Response(JSON.stringify(categories), { status: 200 });
+      }
+      if (url === "/api/entries") {
+        return new Response(JSON.stringify([parcela]), { status: 200 });
+      }
+      return new Response(null, { status: 404 });
+    });
+
+    render(<EntriesPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText("2/6 · TV Samsung")).toBeInTheDocument();
+    });
+    expect(screen.queryByRole("button", { name: /editar/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /excluir/i })).not.toBeInTheDocument();
+  });
+
   it("deletes an existing entry", async () => {
     vi.mocked(fetch).mockImplementation(
       async (input: RequestInfo | URL, init?: RequestInit) => {

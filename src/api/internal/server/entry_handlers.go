@@ -14,6 +14,7 @@ type entryRequest struct {
 	AmountCents int    `json:"amount_cents"`
 	EntryDate   string `json:"entry_date"`
 	CategoryID  uint   `json:"category_id"`
+	PurchaseID  *uint  `json:"purchase_id"`
 }
 
 type nestedCategoryResponse struct {
@@ -21,25 +22,43 @@ type nestedCategoryResponse struct {
 	Name string `json:"name"`
 }
 
+type nestedPurchaseResponse struct {
+	ID               uint   `json:"id"`
+	Description      string `json:"description"`
+	InstallmentCount int    `json:"installment_count"`
+}
+
 type entryResponse struct {
-	ID          uint                    `json:"id"`
-	Type        string                  `json:"type"`
-	AmountCents int                     `json:"amount_cents"`
-	EntryDate   string                  `json:"entry_date"`
-	CategoryID  uint                    `json:"category_id"`
-	Category    *nestedCategoryResponse `json:"category,omitempty"`
+	ID                uint                     `json:"id"`
+	Type              string                   `json:"type"`
+	AmountCents       int                      `json:"amount_cents"`
+	EntryDate         string                   `json:"entry_date"`
+	CategoryID        uint                     `json:"category_id"`
+	Category          *nestedCategoryResponse  `json:"category,omitempty"`
+	PurchaseID        *uint                    `json:"purchase_id,omitempty"`
+	InstallmentNumber *int                     `json:"installment_number,omitempty"`
+	Purchase          *nestedPurchaseResponse  `json:"purchase,omitempty"`
 }
 
 func toEntryResponse(entry ledger.Entry) entryResponse {
 	resp := entryResponse{
-		ID:          entry.ID,
-		Type:        entry.Type,
-		AmountCents: entry.AmountCents,
-		EntryDate:   ledger.FormatEntryDate(entry.EntryDate),
-		CategoryID:  entry.CategoryID,
+		ID:                entry.ID,
+		Type:              entry.Type,
+		AmountCents:       entry.AmountCents,
+		EntryDate:         ledger.FormatEntryDate(entry.EntryDate),
+		CategoryID:        entry.CategoryID,
+		PurchaseID:        entry.PurchaseID,
+		InstallmentNumber: entry.InstallmentNumber,
 	}
 	if entry.Category.ID != 0 {
 		resp.Category = &nestedCategoryResponse{ID: entry.Category.ID, Name: entry.Category.Name}
+	}
+	if entry.Purchase != nil && entry.Purchase.ID != 0 {
+		resp.Purchase = &nestedPurchaseResponse{
+			ID:               entry.Purchase.ID,
+			Description:      entry.Purchase.Description,
+			InstallmentCount: entry.Purchase.InstallmentCount,
+		}
 	}
 	return resp
 }
@@ -47,7 +66,7 @@ func toEntryResponse(entry ledger.Entry) entryResponse {
 func listEntriesHandler(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var entries []ledger.Entry
-		if err := db.Preload("Category").Order("entry_date DESC, id DESC").Find(&entries).Error; err != nil {
+		if err := db.Preload("Category").Preload("Purchase").Order("entry_date DESC, id DESC").Find(&entries).Error; err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, "failed to list entries")
 		}
 
@@ -64,6 +83,9 @@ func createEntryHandler(db *gorm.DB) fiber.Handler {
 		var req entryRequest
 		if err := c.BodyParser(&req); err != nil {
 			return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
+		}
+		if req.PurchaseID != nil {
+			return fiber.NewError(fiber.StatusBadRequest, ledger.ErrPurchaseIDNotAllowed.Error())
 		}
 
 		entry, err := buildEntry(db, req)
@@ -104,6 +126,9 @@ func updateEntryHandler(db *gorm.DB) fiber.Handler {
 		entry, err := findEntry(db, c)
 		if err != nil {
 			return err
+		}
+		if entry.PurchaseID != nil {
+			return fiber.NewError(fiber.StatusConflict, ledger.ErrParcelaImmutable.Error())
 		}
 
 		var req entryPatchRequest
@@ -164,6 +189,9 @@ func deleteEntryHandler(db *gorm.DB) fiber.Handler {
 		if err != nil {
 			return err
 		}
+		if entry.PurchaseID != nil {
+			return fiber.NewError(fiber.StatusConflict, ledger.ErrParcelaImmutable.Error())
+		}
 
 		if err := db.Delete(&entry).Error; err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, "failed to delete entry")
@@ -180,7 +208,7 @@ func findEntry(db *gorm.DB, c *fiber.Ctx) (ledger.Entry, error) {
 	}
 
 	var entry ledger.Entry
-	if err := db.Preload("Category").First(&entry, id).Error; err != nil {
+	if err := db.Preload("Category").Preload("Purchase").First(&entry, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return ledger.Entry{}, fiber.NewError(fiber.StatusNotFound, "entry not found")
 		}
