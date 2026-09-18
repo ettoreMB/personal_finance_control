@@ -32,6 +32,9 @@ export default async function ProtectedLayout({
         <a href="/entries" className="underline">
           Lançamentos
         </a>
+        <a href="/purchases" className="underline">
+          Compras
+        </a>
       </nav>
       {children}
     </div>

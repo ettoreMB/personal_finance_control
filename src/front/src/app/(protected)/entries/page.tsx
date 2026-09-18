@@ -19,7 +19,25 @@ type Entry = {
   entry_date: string;
   category_id: number;
   category?: Category;
+  purchase_id?: number;
+  installment_number?: number;
+  purchase?: {
+    id: number;
+    description: string;
+    installment_count: number;
+  };
 };
+
+function isParcela(entry: Entry): boolean {
+  return entry.purchase_id != null;
+}
+
+function parcelaLabel(entry: Entry): string {
+  if (!entry.purchase || entry.installment_number == null) {
+    return "";
+  }
+  return `${entry.installment_number}/${entry.purchase.installment_count} · ${entry.purchase.description}`;
+}
 
 const features = tableFeatures({});
 const helper = createColumnHelper<typeof features, Entry>();
@@ -34,6 +52,7 @@ const columns = helper.columns([
   }),
   helper.accessor("entry_date", { header: "Data" }),
   helper.accessor((row) => row.category?.name ?? "", { id: "category", header: "Categoria" }),
+  helper.accessor((row) => parcelaLabel(row), { id: "parcela", header: "Parcela" }),
 ]);
 
 const EMPTY_ENTRIES: Entry[] = [];
@@ -247,20 +266,24 @@ export default function EntriesPage() {
                   </td>
                 ))}
                 <td className="flex gap-2 py-2">
-                  <button
-                    type="button"
-                    className="rounded border px-2 py-1"
-                    onClick={() => startEdit(row.original)}
-                  >
-                    Editar
-                  </button>
-                  <button
-                    type="button"
-                    className="rounded border px-2 py-1"
-                    onClick={() => handleDelete(row.original.id)}
-                  >
-                    Excluir
-                  </button>
+                  {isParcela(row.original) ? null : (
+                    <>
+                      <button
+                        type="button"
+                        className="rounded border px-2 py-1"
+                        onClick={() => startEdit(row.original)}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded border px-2 py-1"
+                        onClick={() => handleDelete(row.original.id)}
+                      >
+                        Excluir
+                      </button>
+                    </>
+                  )}
                 </td>
               </tr>
             ))}

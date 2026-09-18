@@ -22,15 +22,18 @@ var (
 )
 
 type Entry struct {
-	ID          uint `gorm:"primaryKey"`
-	Type        string
-	AmountCents int
-	EntryDate   time.Time
-	CategoryID  uint
-	Category    Category `gorm:"foreignKey:CategoryID"`
-	DeletedAt   gorm.DeletedAt
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID                uint `gorm:"primaryKey"`
+	Type              string
+	AmountCents       int
+	EntryDate         time.Time
+	CategoryID        uint
+	Category          Category `gorm:"foreignKey:CategoryID"`
+	PurchaseID        *uint
+	InstallmentNumber *int
+	Purchase          *Purchase `gorm:"foreignKey:PurchaseID"`
+	DeletedAt         gorm.DeletedAt
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
 }
 
 func (Entry) TableName() string {
