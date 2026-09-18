@@ -1,10 +1,10 @@
 # Ideia do produto — Personal Finance Control
 
-> Documento vivo do produto. As decisões abaixo foram fechadas em sessão `/grilling` (2026-08-30).
+> Documento vivo do produto. Core de escrita: `/grilling` (2026-08-30). Visualizações, entrega vertical e backlog restante: `/grill-with-docs` (2026-09-17).
 
 ## Visão geral
 
-App de controle financeiro pessoal, **single-user** (uma única conta, sem conceito de multiusuário). O usuário registra ganhos e gastos (avulsos ou parcelados no cartão de crédito), categoriza os lançamentos e visualiza a saúde financeira por diferentes recortes de tempo. Um dos canais de entrada é o WhatsApp, via mensagem de texto — implementado por último, depois de todo o core estar pronto.
+App de controle financeiro pessoal, **single-user** (uma única conta, sem conceito de multiusuário). O usuário registra ganhos e gastos (avulsos ou parcelados no cartão de crédito), categoriza os lançamentos e visualiza a saúde financeira por diferentes recortes de tempo. Um dos canais de entrada é o WhatsApp, via mensagem de texto — último canal, depois do Painel do mês corrente (não precisa esperar o norte inteiro de visualizações).
 
 Moeda: apenas BRL (R$). Sem suporte a múltiplas moedas, sem campo de moeda no schema.
 
@@ -14,15 +14,16 @@ Moeda: apenas BRL (R$). Sem suporte a múltiplas moedas, sem campo de moeda no s
 - Tipos: ganho ou gasto
 - Data: qualquer data (passada, hoje, futura), não apenas "hoje"
 - Cada lançamento pertence a uma categoria
-- Edição totalmente livre (valor, data, categoria), a qualquer momento — não existe conceito de "mês fechado" que bloqueie edição
+- Todo lançamento é **avulso** ou **parcela**. Avulso: edição/exclusão livres a qualquer momento — não existe "mês fechado". Parcela não se edita nem se exclui isoladamente (mutação pela Compra)
 
 ### Compras parceladas no cartão de crédito
-- Uma compra parcelada gera N lançamentos, um por mês, com valor = total / N
-- Exemplo: compra de R$150 em 3x hoje → R$50 no mês corrente + R$50 nos 2 meses seguintes
+- Uma **Compra** (N entre 2 e 24) gera N gastos, um por mês. Compra à vista (1x) é lançamento avulso, não Compra. Sem entidade Cartão nem Fatura
+- Exemplo: compra de R$150 em 3x hoje → R$50 no mês corrente + R$50 nos 2 meses seguintes (resto da divisão em centavos na última parcela)
 - Cada parcela aparece na visão de "gastos do mês" normalmente, junto com os demais gastos daquele mês
-- **Edição/exclusão da compra original**: parcelas de meses já passados nunca são alteradas (histórico não é reescrito). Apenas parcelas futuras são atualizadas ou removidas
-- **Alterar o valor total de uma compra parcelada não é suportado diretamente**: o fluxo é cancelar as parcelas futuras restantes e lançar uma nova compra parcelada separada
-- Cancelamento de parcelas futuras é feito via **soft delete** (flag/`deleted_at`), mantendo rastreabilidade — nunca hard delete
+- **Prazo fixo**: N e a data da Compra não mudam depois de criada. Não existe cancelar parcelas futuras e deixar as pagas
+- **Editar o valor total**: parcelas de mês calendário já passado (`America/Sao_Paulo`) não são reescritas; o novo total menos a soma do passado é rateado no mês corrente e nas futuras
+- **Desfazer** a Compra inteira (soft delete da Compra e das N parcelas) só vale enquanto nenhuma parcela cai em mês passado. Compra terminada continua na lista. Nunca hard delete
+- Vocabulário e decisões: `CONTEXT.md`, ADRs 0001–0003 (grilling 2026-09-14/15)
 
 ### Categorias
 - Categorias iniciais (casa, carro, comida, lazer) são inseridas via **seed automático em migration** — o app já nasce utilizável
@@ -32,11 +33,15 @@ Moeda: apenas BRL (R$). Sem suporte a múltiplas moedas, sem campo de moeda no s
 
 ## Visualizações
 
-- **Mensal**: ganhos vs. gastos do mês, incluindo parcelas de cartão que caem naquele mês
-- **Por categoria**: total gasto/ganho agrupado por categoria
-- **Semestral**: consolidado de 6 meses
-- **Anual**: consolidado do ano
-- **Cartão de crédito (visão própria)**: total comprometido por compra, agrupado pelo mês da compra original (não pelo mês da parcela). Exemplo: compra de janeiro em 3x de R$50 aparece como R$150 "comprado em janeiro no cartão", mesmo que só R$50 caia na fatura de janeiro
+Norte da sessão `/grill-with-docs` (2026-09-17). Vocabulário: `CONTEXT.md`; recorte civil, futuro-no-período e entrega vertical: ADRs 0004–0006.
+
+Entrega em cortes: primeiro o **mês civil corrente** (ganhos, gastos, Saldo, breakdown). Seletor de Período e modo Cartão vêm depois; um PR não implementa o norte inteiro. Lista de cortes: `IMPLEMENTATION_PLAN.md`.
+
+- Superfície: um **Painel** com dois modos (`Período` | `Cartão`). Lista de lançamentos continua em `/entries`. `/purchases` continua sendo a mutação da Compra. Sem gráfico.
+- **Modo Período**: seletor mês / semestre / ano civil (mesmo shape nos três: ganhos, gastos, Saldo + breakdown). Padrão = recorte corrente em `America/Sao_Paulo`; navega passado e futuro; Período vazio mostra zeros; trocar granularidade mantém o recorte que contém o que está na tela. Sem série mês-a-mês dentro de semestre/ano.
+- **Totais do Período**: lançamentos **ativos** cuja **data** cai no Período — inclusive futuros. Parcela entra no mês da parcela. Compra desfeita não entra. Sem split realizado vs previsto.
+- **Por categoria**: dimensão do Período. Cada categoria com movimento mostra ganhos, gastos e Saldo; sem movimento, some. Não é tela all-time.
+- **Modo Cartão**: mesmo seletor de Período, filtrando a **data da Compra**. Cada Compra ativa: descrição, nome da categoria na Compra, N, Comprometido. Agrupado pelo mês da Compra. Sem “já caído vs restante”. Exemplo: Compra de janeiro em 3x de R$50 aparece como R$150 comprometido em janeiro, mesmo que só R$50 caia como gasto em janeiro.
 
 ## Autenticação
 
@@ -49,7 +54,7 @@ Mesmo sendo single-user, o app tem login completo:
 
 ## Integração com WhatsApp
 
-Última feature a ser implementada, depois de todo o core (lançamentos, cartão, categorias, visualizações, auth) estar pronto e validado.
+Último canal. Não começa antes do Painel do mês corrente existir (senão o lançamento some num livro sem leitura). Não espera seletor de Período nem modo Cartão.
 
 Fluxo pretendido:
 1. Usuário envia mensagem de texto para o WhatsApp com o gasto/ganho (ex: "gastei 45 reais no mercado")
@@ -58,7 +63,7 @@ Fluxo pretendido:
 4. Dados extraídos viram uma chamada para a API criando o lançamento
 5. Resposta de confirmação é enviada de volta ao usuário via WhatsApp
 
-Detalhes de implementação (proteção do webhook, mapeamento de número de telefone, provedor de LLM) ficam para quando essa fase for planejada, já que é a última do roadmap.
+Detalhes de implementação (proteção do webhook, mapeamento de número de telefone, provedor de LLM) ficam para o corte de WhatsApp.
 
 ## Metas/orçamento por categoria
 
@@ -66,7 +71,7 @@ Fora de escopo por enquanto. Não modelado no schema — o schema normalizado + 
 
 ## Testes
 
-Cobertura de 100% (API e Front) é **meta aspiracional**, não é gate obrigatório de CI — não bloqueia merge de PR.
+Cobertura de 100% (API e Front) é **meta aspiracional**, não é gate obrigatório de CI — não bloqueia merge de PR. Unitários viajam no PR de cada corte. e2e (testcontainers / Playwright) é um corte opcional de endurecimento, não uma fase que bloqueia o restante.
 
 ## Deploy
 
