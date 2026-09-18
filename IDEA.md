@@ -14,15 +14,16 @@ Moeda: apenas BRL (R$). Sem suporte a múltiplas moedas, sem campo de moeda no s
 - Tipos: ganho ou gasto
 - Data: qualquer data (passada, hoje, futura), não apenas "hoje"
 - Cada lançamento pertence a uma categoria
-- Edição totalmente livre (valor, data, categoria), a qualquer momento — não existe conceito de "mês fechado" que bloqueie edição
+- Todo lançamento é **avulso** ou **parcela**. Avulso: edição/exclusão livres a qualquer momento — não existe "mês fechado". Parcela não se edita nem se exclui isoladamente (mutação pela Compra)
 
 ### Compras parceladas no cartão de crédito
-- Uma compra parcelada gera N lançamentos, um por mês, com valor = total / N
-- Exemplo: compra de R$150 em 3x hoje → R$50 no mês corrente + R$50 nos 2 meses seguintes
+- Uma **Compra** (N entre 2 e 24) gera N gastos, um por mês. Compra à vista (1x) é lançamento avulso, não Compra. Sem entidade Cartão nem Fatura
+- Exemplo: compra de R$150 em 3x hoje → R$50 no mês corrente + R$50 nos 2 meses seguintes (resto da divisão em centavos na última parcela)
 - Cada parcela aparece na visão de "gastos do mês" normalmente, junto com os demais gastos daquele mês
-- **Edição/exclusão da compra original**: parcelas de meses já passados nunca são alteradas (histórico não é reescrito). Apenas parcelas futuras são atualizadas ou removidas
-- **Alterar o valor total de uma compra parcelada não é suportado diretamente**: o fluxo é cancelar as parcelas futuras restantes e lançar uma nova compra parcelada separada
-- Cancelamento de parcelas futuras é feito via **soft delete** (flag/`deleted_at`), mantendo rastreabilidade — nunca hard delete
+- **Prazo fixo**: N e a data da Compra não mudam depois de criada. Não existe cancelar parcelas futuras e deixar as pagas
+- **Editar o valor total**: parcelas de mês calendário já passado (`America/Sao_Paulo`) não são reescritas; o novo total menos a soma do passado é rateado no mês corrente e nas futuras
+- **Desfazer** a Compra inteira (soft delete da Compra e das N parcelas) só vale enquanto nenhuma parcela cai em mês passado. Compra terminada continua na lista. Nunca hard delete
+- Vocabulário e decisões: `CONTEXT.md`, ADRs 0001–0003 (grilling 2026-09-14/15)
 
 ### Categorias
 - Categorias iniciais (casa, carro, comida, lazer) são inseridas via **seed automático em migration** — o app já nasce utilizável
