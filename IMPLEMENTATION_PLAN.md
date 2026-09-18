@@ -4,7 +4,7 @@ Tracking das features do projeto. Cada feature é implementada em uma branch pr�
 
 Status possíveis: `Não iniciado` · `Em andamento` · `Em revisão (PR aberto)` · `Concluído`
 
-> Fases e escopo refinados via sessão `/grilling` (2026-08-30) — ver decisões em [IDEA.md](./IDEA.md).
+> Fases 0–3: grilling 2026-08-30. Cortes restantes: `/grill-with-docs` 2026-09-17 — norte em [IDEA.md](./IDEA.md), entrega vertical em [ADR 0006](./docs/adr/0006-remaining-work-is-vertical-slices.md). Unitários viajam no PR de cada corte; 100% de cobertura continua meta aspiracional, não gate.
 
 ## Fase 0 — Fundação
 
@@ -42,29 +42,14 @@ Status possíveis: `Não iniciado` · `Em andamento` · `Em revisão (PR aberto)
 | Edição da Compra (descrição, categoria e valor restante; valor/data de parcelas de mês passado intocados) | Concluído | `feat/cartao-parcelado` | [#33](https://github.com/ettoreMB/personal_finance_control/pull/33) | 2026-09-18 |
 | Desfazer a Compra no mês (soft delete da Compra e das N parcelas; bloqueado se alguma parcela já caiu em mês passado) | Concluído | `feat/cartao-parcelado` | [#33](https://github.com/ettoreMB/personal_finance_control/pull/33) | 2026-09-18 |
 
-## Fase 4 — Visualizações
+## Próximos cortes (verticais)
 
-| Feature | Status | Branch | PR | Data |
+Norte do Painel (seletor de Período, semestre/ano, modo Cartão) está no [IDEA.md](./IDEA.md). Cada linha abaixo é um PR. Não reabrir o norte inteiro ao implementar — só o que o corte precisa.
+
+| Corte | Status | Branch | PR | Data |
 |---|---|---|---|---|
-| Visão mensal (ganhos vs. gastos) | Não iniciado | | | |
-| Visão por categoria | Não iniciado | | | |
-| Visão semestral | Não iniciado | | | |
-| Visão anual | Não iniciado | | | |
-| Visão de cartão de crédito (total por compra, agrupado por mês da compra) | Não iniciado | | | |
-
-## Fase 5 — Qualidade e testes
-
-| Feature | Status | Branch | PR | Data |
-|---|---|---|---|---|
-| Cobertura de testes unitários API (meta aspiracional 100%, não bloqueia CI) | Não iniciado | | | |
-| Testes e2e API com testcontainers | Não iniciado | | | |
-| Cobertura de testes unitários Front (meta aspiracional 100%, não bloqueia CI) | Não iniciado | | | |
-| Testes e2e Front com Playwright | Não iniciado | | | |
-
-## Fase 6 — Integração WhatsApp (última fase)
-
-| Feature | Status | Branch | PR | Data |
-|---|---|---|---|---|
-| Setup Evolution API + webhook de recebimento | Não iniciado | | | |
-| Extração estruturada de lançamento via LLM | Não iniciado | | | |
-| Criação de lançamento a partir da mensagem + resposta de confirmação | Não iniciado | | | |
+| Painel — mês corrente (ganhos, gastos, Saldo, breakdown por categoria) | Não iniciado | | | |
+| Painel — seletor de Período (navegar mês/semestre/ano, mesmo shape) | Não iniciado | | | |
+| Painel — modo Cartão (Comprometido pela data da Compra) | Não iniciado | | | |
+| e2e API (testcontainers) e Front (Playwright) — opcional, não bloqueia o restante | Não iniciado | | | |
+| WhatsApp — Evolution API, extração via LLM, lançamento + confirmação (último canal) | Não iniciado | | | |

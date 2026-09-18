@@ -58,6 +58,20 @@ describe("PurchasesPage", () => {
     });
   });
 
+  it("masks the amount as the user types", async () => {
+    render(<PurchasesPage />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Valor")).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByLabelText("Valor"), {
+      target: { value: "11050" },
+    });
+
+    expect(screen.getByLabelText("Valor")).toHaveValue("110,50");
+  });
+
   it("creates a purchase and shows it in the list", async () => {
     render(<PurchasesPage />);
 

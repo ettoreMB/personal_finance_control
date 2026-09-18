@@ -9,6 +9,7 @@ import (
 
 func TestLoadReadsEnvVars(t *testing.T) {
 	t.Setenv("SQLITE_PATH", "/tmp/test.sqlite")
+	t.Setenv("MIGRATIONS_PATH", "/app/migrations")
 	t.Setenv("RECOVERY_SECRET", "s3cr3t")
 	t.Setenv("COOKIE_SECURE", "true")
 
@@ -16,6 +17,9 @@ func TestLoadReadsEnvVars(t *testing.T) {
 
 	if cfg.SQLitePath != "/tmp/test.sqlite" {
 		t.Errorf("expected SQLitePath %q, got %q", "/tmp/test.sqlite", cfg.SQLitePath)
+	}
+	if cfg.MigrationsPath != "/app/migrations" {
+		t.Errorf("expected MigrationsPath %q, got %q", "/app/migrations", cfg.MigrationsPath)
 	}
 	if cfg.RecoverySecret != "s3cr3t" {
 		t.Errorf("expected RecoverySecret %q, got %q", "s3cr3t", cfg.RecoverySecret)
@@ -35,5 +39,15 @@ func TestLoadDefaultsCookieSecureToFalse(t *testing.T) {
 
 	if cfg.CookieSecure {
 		t.Error("expected CookieSecure to default to false")
+	}
+}
+
+func TestLoadDefaultsMigrationsPath(t *testing.T) {
+	t.Setenv("MIGRATIONS_PATH", "")
+
+	cfg := config.Load()
+
+	if cfg.MigrationsPath != "migrations" {
+		t.Errorf("expected MigrationsPath %q, got %q", "migrations", cfg.MigrationsPath)
 	}
 }
