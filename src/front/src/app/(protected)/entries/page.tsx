@@ -37,6 +37,7 @@ type Entry = {
   type: "income" | "expense";
   amount_cents: number;
   entry_date: string;
+  description: string;
   category_id: number;
   category?: Category;
   purchase_id?: number;
@@ -80,6 +81,7 @@ const columns = helper.columns([
     id: "category",
     header: "Categoria",
   }),
+  helper.accessor("description", { header: "Descrição" }),
   helper.accessor((row) => parcelaLabel(row), { id: "parcela", header: "Parcela" }),
 ]);
 
@@ -95,6 +97,7 @@ export default function EntriesPage() {
   const [type, setType] = useState<"income" | "expense">("expense");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState("");
+  const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -136,6 +139,7 @@ export default function EntriesPage() {
     setType("expense");
     setAmount("");
     setDate("");
+    setDescription("");
     setCategoryId("");
     setEditingId(null);
   }
@@ -145,6 +149,7 @@ export default function EntriesPage() {
     setType(entry.type);
     setAmount(formatReaisFromCents(entry.amount_cents));
     setDate(entry.entry_date);
+    setDescription(entry.description);
     setCategoryId(String(entry.category_id));
     setError(null);
   }
@@ -157,6 +162,7 @@ export default function EntriesPage() {
       type,
       amount_cents: parseReaisToCents(amount),
       entry_date: date,
+      description,
       category_id: Number(categoryId),
     };
 
@@ -238,6 +244,15 @@ export default function EntriesPage() {
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
+              />
+            </Label>
+            <Label className="flex-col items-stretch gap-2 sm:col-span-2">
+              Descrição
+              <Input
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Ex.: água, luz, internet"
+                autoComplete="off"
               />
             </Label>
             <Label className="flex-col items-stretch gap-2">
