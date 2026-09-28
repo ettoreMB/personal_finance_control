@@ -1,11 +1,23 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import { NativeSelect } from "@/components/native-select";
+import { PageHeader } from "@/components/page-header";
 import {
   formatReaisFromCents,
   maskReaisInput,
   parseReaisToCents,
 } from "@/lib/money";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 type Category = {
   id: number;
@@ -164,153 +176,164 @@ export default function PurchasesPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-6">
-      <h1 className="text-2xl font-semibold">Compras</h1>
+    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-4 md:p-6">
+      <PageHeader
+        title="Compras"
+        description="Compra parcelada no cartão. As parcelas entram no mês de cada uma."
+      />
 
-      <form onSubmit={handleCreate} className="grid gap-3 sm:grid-cols-2">
-        <label className="flex flex-col gap-1 sm:col-span-2">
-          Descrição
-          <input
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="rounded border px-3 py-2"
-          />
-        </label>
-        <label className="flex flex-col gap-1">
-          Data
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="rounded border px-3 py-2"
-          />
-        </label>
-        <label className="flex flex-col gap-1">
-          Valor
-          <input
-            value={amount}
-            onChange={(e) => setAmount(maskReaisInput(e.target.value))}
-            className="rounded border px-3 py-2"
-            inputMode="numeric"
-            autoComplete="off"
-          />
-        </label>
-        <label className="flex flex-col gap-1">
-          Parcelas
-          <input
-            value={installments}
-            onChange={(e) => setInstallments(e.target.value)}
-            className="rounded border px-3 py-2"
-            inputMode="numeric"
-          />
-        </label>
-        <label className="flex flex-col gap-1">
-          Categoria
-          <select
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            className="rounded border px-3 py-2"
-          >
-            <option value="">Selecione</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button
-          type="submit"
-          className="rounded bg-foreground px-4 py-2 text-background sm:col-span-2"
-        >
-          Registrar compra
-        </button>
-      </form>
+      <Card>
+        <CardHeader>
+          <CardTitle>Registrar compra</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleCreate} className="grid gap-4 sm:grid-cols-2">
+            <Label className="flex-col items-stretch gap-2 sm:col-span-2">
+              Descrição
+              <Input
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </Label>
+            <Label className="flex-col items-stretch gap-2">
+              Data
+              <Input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+              />
+            </Label>
+            <Label className="flex-col items-stretch gap-2">
+              Valor
+              <Input
+                value={amount}
+                onChange={(e) => setAmount(maskReaisInput(e.target.value))}
+                inputMode="numeric"
+                autoComplete="off"
+              />
+            </Label>
+            <Label className="flex-col items-stretch gap-2">
+              Parcelas
+              <Input
+                value={installments}
+                onChange={(e) => setInstallments(e.target.value)}
+                inputMode="numeric"
+              />
+            </Label>
+            <Label className="flex-col items-stretch gap-2">
+              Categoria
+              <NativeSelect
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+              >
+                <option value="">Selecione</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </NativeSelect>
+            </Label>
+            <Button type="submit" className="sm:col-span-2">
+              Registrar compra
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
 
-      {error && <p className="text-red-600">{error}</p>}
+      {error ? (
+        <p role="alert" className="text-sm text-destructive">
+          {error}
+        </p>
+      ) : null}
 
       {purchases.length === 0 && !error ? (
-        <p>Nenhuma compra ainda.</p>
+        <p className="text-sm text-muted-foreground">Nenhuma compra ainda.</p>
       ) : (
-        <ul className="flex flex-col gap-4">
+        <ul className="flex flex-col gap-3">
           {purchases.map((purchase) => (
-            <li key={purchase.id} className="border-b pb-3">
-              {editingId === purchase.id ? (
-                <form
-                  onSubmit={(event) => handleEdit(event, purchase.id)}
-                  className="grid gap-3 sm:grid-cols-2"
-                >
-                  <label className="flex flex-col gap-1 sm:col-span-2">
-                    Descrição
-                    <input
-                      value={editDescription}
-                      onChange={(e) => setEditDescription(e.target.value)}
-                      className="rounded border px-3 py-2"
-                    />
-                  </label>
-                  <label className="flex flex-col gap-1">
-                    Valor
-                    <input
-                      value={editAmount}
-                      onChange={(e) => setEditAmount(maskReaisInput(e.target.value))}
-                      className="rounded border px-3 py-2"
-                      inputMode="numeric"
-                      autoComplete="off"
-                    />
-                  </label>
-                  <label className="flex flex-col gap-1">
-                    Categoria
-                    <select
-                      value={editCategoryId}
-                      onChange={(e) => setEditCategoryId(e.target.value)}
-                      className="rounded border px-3 py-2"
+            <li key={purchase.id}>
+              <Card>
+                <CardContent>
+                  {editingId === purchase.id ? (
+                    <form
+                      onSubmit={(event) => handleEdit(event, purchase.id)}
+                      className="grid gap-4 sm:grid-cols-2"
                     >
-                      {categories.map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <button
-                    type="submit"
-                    className="rounded bg-foreground px-3 py-2 text-background"
-                  >
-                    Salvar
-                  </button>
-                  <button
-                    type="button"
-                    className="rounded border px-3 py-2"
-                    onClick={() => setEditingId(null)}
-                  >
-                    Cancelar
-                  </button>
-                </form>
-              ) : (
-                <>
-                  <p className="font-medium">{purchase.description}</p>
-                  <p>
-                    {formatBRL(purchase.amount_cents)} · {purchase.installment_count}x ·{" "}
-                    {purchase.purchase_date} · {purchase.category_name}
-                  </p>
-                  <div className="mt-2 flex gap-2">
-                    <button
-                      type="button"
-                      className="rounded border px-3 py-1"
-                      onClick={() => startEdit(purchase)}
-                    >
-                      Editar
-                    </button>
-                    <button
-                      type="button"
-                      className="rounded border px-3 py-1"
-                      onClick={() => handleUndo(purchase.id)}
-                    >
-                      Desfazer
-                    </button>
-                  </div>
-                </>
-              )}
+                      <Label className="flex-col items-stretch gap-2 sm:col-span-2">
+                        Descrição
+                        <Input
+                          value={editDescription}
+                          onChange={(e) => setEditDescription(e.target.value)}
+                        />
+                      </Label>
+                      <Label className="flex-col items-stretch gap-2">
+                        Valor
+                        <Input
+                          value={editAmount}
+                          onChange={(e) =>
+                            setEditAmount(maskReaisInput(e.target.value))
+                          }
+                          inputMode="numeric"
+                          autoComplete="off"
+                        />
+                      </Label>
+                      <Label className="flex-col items-stretch gap-2">
+                        Categoria
+                        <NativeSelect
+                          value={editCategoryId}
+                          onChange={(e) => setEditCategoryId(e.target.value)}
+                        >
+                          {categories.map((category) => (
+                            <option key={category.id} value={category.id}>
+                              {category.name}
+                            </option>
+                          ))}
+                        </NativeSelect>
+                      </Label>
+                      <div className="flex gap-2 sm:col-span-2">
+                        <Button type="submit">Salvar</Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setEditingId(null)}
+                        >
+                          Cancelar
+                        </Button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex flex-col gap-1">
+                        <p className="font-medium">{purchase.description}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {formatBRL(purchase.amount_cents)} · {purchase.purchase_date} ·{" "}
+                          {purchase.category_name}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary">{purchase.installment_count}x</Badge>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => startEdit(purchase)}
+                        >
+                          Editar
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleUndo(purchase.id)}
+                        >
+                          Desfazer
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </li>
           ))}
         </ul>

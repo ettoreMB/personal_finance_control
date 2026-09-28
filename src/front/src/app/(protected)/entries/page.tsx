@@ -6,11 +6,26 @@ import {
   tableFeatures,
   useTable,
 } from "@tanstack/react-table";
+import { NativeSelect } from "@/components/native-select";
+import { PageHeader } from "@/components/page-header";
 import {
   formatReaisFromCents,
   maskReaisInput,
   parseReaisToCents,
 } from "@/lib/money";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 type Category = {
   id: number;
@@ -49,14 +64,22 @@ const helper = createColumnHelper<typeof features, Entry>();
 const columns = helper.columns([
   helper.accessor("type", {
     header: "Tipo",
-    cell: ({ getValue }) => (getValue() === "income" ? "Ganho" : "Gasto"),
+    cell: ({ getValue }) =>
+      getValue() === "income" ? (
+        <Badge variant="secondary">Ganho</Badge>
+      ) : (
+        <Badge variant="outline">Gasto</Badge>
+      ),
   }),
   helper.accessor("amount_cents", {
     header: "Valor",
     cell: ({ getValue }) => formatBRL(getValue()),
   }),
   helper.accessor("entry_date", { header: "Data" }),
-  helper.accessor((row) => row.category?.name ?? "", { id: "category", header: "Categoria" }),
+  helper.accessor((row) => row.category?.name ?? "", {
+    id: "category",
+    header: "Categoria",
+  }),
   helper.accessor((row) => parcelaLabel(row), { id: "parcela", header: "Parcela" }),
 ]);
 
@@ -178,114 +201,133 @@ export default function EntriesPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-6">
-      <h1 className="text-2xl font-semibold">Lançamentos</h1>
+    <div className="mx-auto flex w-full min-w-0 max-w-4xl flex-1 flex-col gap-6 p-4 md:p-6">
+      <PageHeader
+        title="Lançamentos"
+        description="Ganhos e gastos avulsos. Parcela de compra aparece aqui, mas se edita na compra."
+      />
 
-      <form onSubmit={handleSubmit} className="grid gap-3 sm:grid-cols-2">
-        <label className="flex flex-col gap-1">
-          Tipo
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value as "income" | "expense")}
-            className="rounded border px-3 py-2"
-          >
-            <option value="expense">Gasto</option>
-            <option value="income">Ganho</option>
-          </select>
-        </label>
-        <label className="flex flex-col gap-1">
-          Valor
-          <input
-            value={amount}
-            onChange={(e) => setAmount(maskReaisInput(e.target.value))}
-            className="rounded border px-3 py-2"
-            inputMode="numeric"
-            autoComplete="off"
-          />
-        </label>
-        <label className="flex flex-col gap-1">
-          Data
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="rounded border px-3 py-2"
-          />
-        </label>
-        <label className="flex flex-col gap-1">
-          Categoria
-          <select
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            className="rounded border px-3 py-2"
-          >
-            <option value="">Selecione</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button
-          type="submit"
-          className="rounded bg-foreground px-4 py-2 text-background sm:col-span-2"
-        >
-          {editingId === null ? "Lançar" : "Salvar"}
-        </button>
-      </form>
+      <Card>
+        <CardHeader>
+          <CardTitle>{editingId === null ? "Novo lançamento" : "Editar lançamento"}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
+            <Label className="flex-col items-stretch gap-2">
+              Tipo
+              <NativeSelect
+                value={type}
+                onChange={(e) => setType(e.target.value as "income" | "expense")}
+              >
+                <option value="expense">Gasto</option>
+                <option value="income">Ganho</option>
+              </NativeSelect>
+            </Label>
+            <Label className="flex-col items-stretch gap-2">
+              Valor
+              <Input
+                value={amount}
+                onChange={(e) => setAmount(maskReaisInput(e.target.value))}
+                inputMode="numeric"
+                autoComplete="off"
+              />
+            </Label>
+            <Label className="flex-col items-stretch gap-2">
+              Data
+              <Input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+              />
+            </Label>
+            <Label className="flex-col items-stretch gap-2">
+              Categoria
+              <NativeSelect
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+              >
+                <option value="">Selecione</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </NativeSelect>
+            </Label>
+            <div className="flex gap-2 sm:col-span-2">
+              <Button type="submit">
+                {editingId === null ? "Lançar" : "Salvar"}
+              </Button>
+              {editingId !== null ? (
+                <Button type="button" variant="outline" onClick={resetForm}>
+                  Cancelar
+                </Button>
+              ) : null}
+            </div>
+          </form>
+        </CardContent>
+      </Card>
 
-      {error && <p className="text-red-600">{error}</p>}
+      {error ? (
+        <p role="alert" className="text-sm text-destructive">
+          {error}
+        </p>
+      ) : null}
 
       {entries.length === 0 && !error ? (
-        <p>Nenhum lançamento ainda.</p>
+        <p className="text-sm text-muted-foreground">Nenhum lançamento ainda.</p>
       ) : entries.length === 0 ? null : (
-        <table className="w-full border-collapse text-left">
-          <thead>
-            {table.getHeaderGroups().map((group) => (
-              <tr key={group.id} className="border-b">
-                {group.headers.map((header) => (
-                  <th key={header.id} className="py-2">
-                    {header.isPlaceholder ? null : (
-                      <table.FlexRender header={header} />
+        <Card className="py-0">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((group) => (
+                <TableRow key={group.id}>
+                  {group.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder ? null : (
+                        <table.FlexRender header={header} />
+                      )}
+                    </TableHead>
+                  ))}
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getAllCells().map((cell) => (
+                    <TableCell key={cell.id} className="tabular-nums">
+                      <table.FlexRender cell={cell} />
+                    </TableCell>
+                  ))}
+                  <TableCell>
+                    {isParcela(row.original) ? null : (
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => startEdit(row.original)}
+                        >
+                          Editar
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDelete(row.original.id)}
+                        >
+                          Excluir
+                        </Button>
+                      </div>
                     )}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className="border-b">
-                {row.getAllCells().map((cell) => (
-                  <td key={cell.id} className="py-2">
-                    <table.FlexRender cell={cell} />
-                  </td>
-                ))}
-                <td className="flex gap-2 py-2">
-                  {isParcela(row.original) ? null : (
-                    <>
-                      <button
-                        type="button"
-                        className="rounded border px-2 py-1"
-                        onClick={() => startEdit(row.original)}
-                      >
-                        Editar
-                      </button>
-                      <button
-                        type="button"
-                        className="rounded border px-2 py-1"
-                        onClick={() => handleDelete(row.original.id)}
-                      >
-                        Excluir
-                      </button>
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
       )}
     </div>
   );

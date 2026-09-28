@@ -1,6 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { PageHeader } from "@/components/page-header";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 type SummaryPeriod = {
   kind: string;
@@ -36,6 +51,16 @@ function formatPeriod(period: SummaryPeriod): string {
   }).format(date);
 }
 
+function moneyClass(cents: number): string {
+  if (cents < 0) {
+    return "text-destructive";
+  }
+  if (cents > 0) {
+    return "text-emerald-700 dark:text-emerald-400";
+  }
+  return "";
+}
+
 export default function DashboardPage() {
   const [summary, setSummary] = useState<Summary | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -53,47 +78,83 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6">
-      <h1 className="text-2xl font-semibold">Painel</h1>
-      {error ? <p role="alert">{error}</p> : null}
+    <div className="@container/main flex min-w-0 flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6">
+      <PageHeader
+        title="Painel"
+        description={summary ? formatPeriod(summary.period) : undefined}
+      />
+      {error ? (
+        <p role="alert" className="text-sm text-destructive">
+          {error}
+        </p>
+      ) : null}
       {summary ? (
         <>
-          <p>{formatPeriod(summary.period)}</p>
-          <dl className="flex flex-wrap gap-8">
-            <div>
-              <dt>Ganhos</dt>
-              <dd>{formatBRL(summary.income_cents)}</dd>
-            </div>
-            <div>
-              <dt>Gastos</dt>
-              <dd>{formatBRL(summary.expense_cents)}</dd>
-            </div>
-            <div>
-              <dt>Saldo</dt>
-              <dd>{formatBRL(summary.balance_cents)}</dd>
-            </div>
-          </dl>
+          <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-3">
+            <Card className="bg-gradient-to-t from-primary/5 to-card shadow-xs">
+              <CardHeader>
+                <CardDescription>Ganhos</CardDescription>
+                <CardTitle
+                  className={`text-2xl tabular-nums ${moneyClass(summary.income_cents)}`}
+                >
+                  {formatBRL(summary.income_cents)}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+            <Card className="bg-gradient-to-t from-primary/5 to-card shadow-xs">
+              <CardHeader>
+                <CardDescription>Gastos</CardDescription>
+                <CardTitle className="text-2xl tabular-nums">
+                  {formatBRL(summary.expense_cents)}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+            <Card className="bg-gradient-to-t from-primary/5 to-card shadow-xs">
+              <CardHeader>
+                <CardDescription>Saldo</CardDescription>
+                <CardTitle
+                  className={`text-2xl tabular-nums ${moneyClass(summary.balance_cents)}`}
+                >
+                  {formatBRL(summary.balance_cents)}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+          </div>
           {summary.categories.length > 0 ? (
-            <table>
-              <thead>
-                <tr>
-                  <th>Categoria</th>
-                  <th>Ganhos</th>
-                  <th>Gastos</th>
-                  <th>Saldo</th>
-                </tr>
-              </thead>
-              <tbody>
-                {summary.categories.map((row) => (
-                  <tr key={row.category_id}>
-                    <td>{row.category_name}</td>
-                    <td>{formatBRL(row.income_cents)}</td>
-                    <td>{formatBRL(row.expense_cents)}</td>
-                    <td>{formatBRL(row.balance_cents)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <Card className="py-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Categoria</TableHead>
+                    <TableHead className="text-right">Ganhos</TableHead>
+                    <TableHead className="text-right">Gastos</TableHead>
+                    <TableHead className="text-right">Saldo</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {summary.categories.map((row) => (
+                    <TableRow key={row.category_id}>
+                      <TableCell className="font-medium">
+                        {row.category_name}
+                      </TableCell>
+                      <TableCell
+                        className={`text-right tabular-nums ${moneyClass(row.income_cents)}`}
+                      >
+                        {formatBRL(row.income_cents)}
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums">
+                        {formatBRL(row.expense_cents)}
+                      </TableCell>
+                      <TableCell
+                        className={`text-right tabular-nums ${moneyClass(row.balance_cents)}`}
+                      >
+                        {formatBRL(row.balance_cents)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
           ) : null}
         </>
       ) : null}

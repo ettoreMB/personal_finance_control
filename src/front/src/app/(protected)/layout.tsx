@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
+import { AppShell } from "@/components/app-shell";
 import { apiUrl } from "@/lib/api";
 
 export default async function ProtectedLayout({
@@ -19,23 +20,5 @@ export default async function ProtectedLayout({
     redirect("/login");
   }
 
-  return (
-    <div className="flex min-h-full flex-col">
-      <nav className="flex gap-4 border-b px-6 py-3">
-        <a href="/dashboard" className="underline">
-          Painel
-        </a>
-        <a href="/categories" className="underline">
-          Categorias
-        </a>
-        <a href="/entries" className="underline">
-          Lançamentos
-        </a>
-        <a href="/purchases" className="underline">
-          Compras
-        </a>
-      </nav>
-      {children}
-    </div>
-  );
+  return <AppShell>{children}</AppShell>;
 }
