@@ -1,6 +1,16 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import { PageHeader } from "@/components/page-header";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 type Category = {
   id: number;
@@ -97,86 +107,87 @@ export default function CategoriesPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-xl flex-col gap-6 p-6">
-      <h1 className="text-2xl font-semibold">Categorias</h1>
+    <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 p-4 md:p-6">
+      <PageHeader
+        title="Categorias"
+        description="Casa, carro, comida e o que mais você quiser classificar."
+      />
 
-      <form onSubmit={handleCreate} className="flex flex-col gap-2 sm:flex-row">
-        <label className="flex flex-1 flex-col gap-1">
-          Nome
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="rounded border px-3 py-2"
-          />
-        </label>
-        <button
-          type="submit"
-          className="self-end rounded bg-foreground px-4 py-2 text-background"
-        >
-          Criar
-        </button>
-      </form>
+      <Card>
+        <CardHeader>
+          <CardTitle>Nova categoria</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleCreate} className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <Label className="flex-1 flex-col items-stretch gap-2">
+              Nome
+              <Input value={name} onChange={(e) => setName(e.target.value)} />
+            </Label>
+            <Button type="submit">Criar</Button>
+          </form>
+        </CardContent>
+      </Card>
 
-      {error && <p className="text-red-600">{error}</p>}
+      {error ? (
+        <p role="alert" className="text-sm text-destructive">
+          {error}
+        </p>
+      ) : null}
 
-      <ul className="flex flex-col gap-3">
-        {categories.map((category) => (
-          <li
-            key={category.id}
-            className="flex flex-wrap items-center gap-2 border-b pb-2"
-          >
-            {editingId === category.id ? (
-              <form
-                onSubmit={(event) => handleRename(event, category.id)}
-                className="flex flex-1 flex-wrap items-center gap-2"
-              >
-                <label className="flex flex-1 flex-col gap-1">
-                  Novo nome
-                  <input
-                    value={editingName}
-                    onChange={(e) => setEditingName(e.target.value)}
-                    className="rounded border px-3 py-2"
-                  />
-                </label>
-                <button
-                  type="submit"
-                  className="rounded bg-foreground px-3 py-2 text-background"
+      <Card className="py-0">
+        <ul className="flex flex-col">
+          {categories.map((category) => (
+            <li
+              key={category.id}
+              className="flex flex-wrap items-center gap-2 border-b px-4 py-3 last:border-b-0"
+            >
+              {editingId === category.id ? (
+                <form
+                  onSubmit={(event) => handleRename(event, category.id)}
+                  className="flex flex-1 flex-wrap items-end gap-2"
                 >
-                  Salvar
-                </button>
-                <button
-                  type="button"
-                  className="rounded border px-3 py-2"
-                  onClick={() => setEditingId(null)}
-                >
-                  Cancelar
-                </button>
-              </form>
-            ) : (
-              <>
-                <span className="flex-1">{category.name}</span>
-                <button
-                  type="button"
-                  className="rounded border px-3 py-1"
-                  onClick={() => {
-                    setEditingId(category.id);
-                    setEditingName(category.name);
-                  }}
-                >
-                  Renomear
-                </button>
-                <button
-                  type="button"
-                  className="rounded border px-3 py-1"
-                  onClick={() => handleDelete(category.id)}
-                >
-                  {`Excluir ${category.name}`}
-                </button>
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
+                  <Label className="min-w-40 flex-1 flex-col items-stretch gap-2">
+                    Novo nome
+                    <Input
+                      value={editingName}
+                      onChange={(e) => setEditingName(e.target.value)}
+                    />
+                  </Label>
+                  <Button type="submit">Salvar</Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setEditingId(null)}
+                  >
+                    Cancelar
+                  </Button>
+                </form>
+              ) : (
+                <>
+                  <span className="flex-1 font-medium">{category.name}</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setEditingId(category.id);
+                      setEditingName(category.name);
+                    }}
+                  >
+                    Renomear
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={() => handleDelete(category.id)}
+                  >
+                    {`Excluir ${category.name}`}
+                  </Button>
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
+      </Card>
     </div>
   );
 }
