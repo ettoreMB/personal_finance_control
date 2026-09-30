@@ -15,6 +15,7 @@ const createdEntry = {
   type: "expense",
   amount_cents: 4500,
   entry_date: "2026-01-15",
+  description: "água",
   category_id: 2,
   category: { id: 2, name: "casa" },
 };
@@ -105,6 +106,9 @@ describe("EntriesPage", () => {
     fireEvent.change(screen.getByLabelText("Data"), {
       target: { value: "2026-01-15" },
     });
+    fireEvent.change(screen.getByLabelText("Descrição"), {
+      target: { value: "água" },
+    });
     fireEvent.change(screen.getByLabelText("Categoria"), {
       target: { value: "2" },
     });
@@ -112,6 +116,17 @@ describe("EntriesPage", () => {
 
     await waitFor(() => {
       expect(screen.getByText("R$ 45,00")).toBeInTheDocument();
+    });
+    expect(screen.getByRole("cell", { name: "água" })).toBeInTheDocument();
+
+    const postCall = vi.mocked(fetch).mock.calls.find((call) => {
+      const [input, init] = call;
+      return String(input) === "/api/entries" && init?.method === "POST";
+    });
+    expect(JSON.parse(String(postCall?.[1]?.body))).toMatchObject({
+      description: "água",
+      amount_cents: 4500,
+      category_id: 2,
     });
     expect(screen.getAllByText("Gasto").length).toBeGreaterThan(1);
     expect(screen.getByRole("cell", { name: "casa" })).toBeInTheDocument();

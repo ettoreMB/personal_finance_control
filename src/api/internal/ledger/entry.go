@@ -2,6 +2,7 @@ package ledger
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -14,11 +15,11 @@ const (
 )
 
 var (
-	ErrInvalidEntryType   = errors.New("type must be income or expense")
-	ErrInvalidAmount      = errors.New("amount_cents must be greater than 0")
-	ErrInvalidEntryDate   = errors.New("entry_date must be YYYY-MM-DD")
-	ErrCategoryRequired   = errors.New("category_id is required")
-	ErrCategoryNotFound   = errors.New("category not found")
+	ErrInvalidEntryType = errors.New("type must be income or expense")
+	ErrInvalidAmount    = errors.New("amount_cents must be greater than 0")
+	ErrInvalidEntryDate = errors.New("entry_date must be YYYY-MM-DD")
+	ErrCategoryRequired = errors.New("category_id is required")
+	ErrCategoryNotFound = errors.New("category not found")
 )
 
 type Entry struct {
@@ -26,6 +27,7 @@ type Entry struct {
 	Type              string
 	AmountCents       int
 	EntryDate         time.Time
+	Description       string
 	CategoryID        uint
 	Category          Category `gorm:"foreignKey:CategoryID"`
 	PurchaseID        *uint
@@ -38,6 +40,10 @@ type Entry struct {
 
 func (Entry) TableName() string {
 	return "entries"
+}
+
+func NormalizeEntryDescription(description string) string {
+	return strings.TrimSpace(description)
 }
 
 func ParseEntryType(value string) (string, error) {
