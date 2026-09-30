@@ -48,7 +48,7 @@ Norte do Painel (seletor de Período, semestre/ano, modo Cartão) está no [IDEA
 
 | Corte | Status | Branch | PR | Data |
 |---|---|---|---|---|
-| Painel — mês corrente (ganhos, gastos, Saldo, breakdown por categoria) | Não iniciado | | | |
+| Painel — mês corrente (ganhos, gastos, Saldo, breakdown por categoria) | Concluído | `feat/painel-mes-corrente` | [#39](https://github.com/ettoreMB/personal_finance_control/pull/39) | 2026-09-18 |
 | Painel — seletor de Período (navegar mês/semestre/ano, mesmo shape) | Não iniciado | | | |
 | Painel — modo Cartão (Comprometido pela data da Compra) | Não iniciado | | | |
 | e2e API (testcontainers) e Front (Playwright) — opcional, não bloqueia o restante | Não iniciado | | | |
