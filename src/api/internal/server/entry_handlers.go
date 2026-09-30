@@ -13,6 +13,7 @@ type entryRequest struct {
 	Type        string `json:"type"`
 	AmountCents int    `json:"amount_cents"`
 	EntryDate   string `json:"entry_date"`
+	Description string `json:"description"`
 	CategoryID  uint   `json:"category_id"`
 	PurchaseID  *uint  `json:"purchase_id"`
 }
@@ -29,15 +30,16 @@ type nestedPurchaseResponse struct {
 }
 
 type entryResponse struct {
-	ID                uint                     `json:"id"`
-	Type              string                   `json:"type"`
-	AmountCents       int                      `json:"amount_cents"`
-	EntryDate         string                   `json:"entry_date"`
-	CategoryID        uint                     `json:"category_id"`
-	Category          *nestedCategoryResponse  `json:"category,omitempty"`
-	PurchaseID        *uint                    `json:"purchase_id,omitempty"`
-	InstallmentNumber *int                     `json:"installment_number,omitempty"`
-	Purchase          *nestedPurchaseResponse  `json:"purchase,omitempty"`
+	ID                uint                    `json:"id"`
+	Type              string                  `json:"type"`
+	AmountCents       int                     `json:"amount_cents"`
+	EntryDate         string                  `json:"entry_date"`
+	Description       string                  `json:"description"`
+	CategoryID        uint                    `json:"category_id"`
+	Category          *nestedCategoryResponse `json:"category,omitempty"`
+	PurchaseID        *uint                   `json:"purchase_id,omitempty"`
+	InstallmentNumber *int                    `json:"installment_number,omitempty"`
+	Purchase          *nestedPurchaseResponse `json:"purchase,omitempty"`
 }
 
 func toEntryResponse(entry ledger.Entry) entryResponse {
@@ -46,6 +48,7 @@ func toEntryResponse(entry ledger.Entry) entryResponse {
 		Type:              entry.Type,
 		AmountCents:       entry.AmountCents,
 		EntryDate:         ledger.FormatEntryDate(entry.EntryDate),
+		Description:       entry.Description,
 		CategoryID:        entry.CategoryID,
 		PurchaseID:        entry.PurchaseID,
 		InstallmentNumber: entry.InstallmentNumber,
@@ -118,6 +121,7 @@ type entryPatchRequest struct {
 	Type        *string `json:"type"`
 	AmountCents *int    `json:"amount_cents"`
 	EntryDate   *string `json:"entry_date"`
+	Description *string `json:"description"`
 	CategoryID  *uint   `json:"category_id"`
 }
 
@@ -156,6 +160,9 @@ func updateEntryHandler(db *gorm.DB) fiber.Handler {
 				return mapEntryError(err)
 			}
 			entry.EntryDate = date
+		}
+		if req.Description != nil {
+			entry.Description = ledger.NormalizeEntryDescription(*req.Description)
 		}
 		if req.CategoryID != nil {
 			if *req.CategoryID == 0 {
@@ -247,6 +254,7 @@ func buildEntry(db *gorm.DB, req entryRequest) (ledger.Entry, error) {
 		Type:        entryType,
 		AmountCents: amount,
 		EntryDate:   date,
+		Description: ledger.NormalizeEntryDescription(req.Description),
 		CategoryID:  category.ID,
 		Category:    category,
 	}, nil

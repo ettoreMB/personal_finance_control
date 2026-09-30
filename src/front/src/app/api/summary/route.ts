@@ -1,5 +1,6 @@
 import { proxyToApi } from "@/lib/proxy";
 
 export function GET(request: Request) {
-  return proxyToApi("/summary", request, "GET");
+  const query = new URL(request.url).search;
+  return proxyToApi(`/summary${query}`, request, "GET");
 }

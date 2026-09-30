@@ -288,6 +288,64 @@ func TestSummaryMergesParcelasFromDifferentPurchases(t *testing.T) {
 	}
 }
 
+func TestSummaryQuerySelectsThatMonth(t *testing.T) {
+	app := newTestApp(t)
+	cookie := loginCookie(t, app)
+	casa := casaCategoryID(t, app, cookie)
+
+	previous := firstOfMonth(-1)
+	if resp := doCreateEntry(t, app, cookie, entryPayload{
+		Type: "expense", AmountCents: 4000, EntryDate: previous, CategoryID: casa,
+	}); resp.StatusCode != http.StatusCreated {
+		t.Fatalf("create previous: %d", resp.StatusCode)
+	}
+	if resp := doCreateEntry(t, app, cookie, entryPayload{
+		Type: "expense", AmountCents: 1000, EntryDate: firstOfMonth(0), CategoryID: casa,
+	}); resp.StatusCode != http.StatusCreated {
+		t.Fatalf("create current: %d", resp.StatusCode)
+	}
+
+	parsed, err := time.Parse("2006-01-02", previous)
+	if err != nil {
+		t.Fatalf("parse previous: %v", err)
+	}
+	path := "/summary?year=" + parsed.Format("2006") + "&month=" + parsed.Format("1")
+	req, err := http.NewRequest(http.MethodGet, path, nil)
+	if err != nil {
+		t.Fatalf("request: %v", err)
+	}
+	req.AddCookie(cookie)
+	resp, err := app.Test(req)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected status %d, got %d", http.StatusOK, resp.StatusCode)
+	}
+	got := decodeSummary(t, resp)
+	if got.Period.Year != parsed.Year() || got.Period.Month != int(parsed.Month()) {
+		t.Fatalf("unexpected period: %+v", got.Period)
+	}
+	if got.ExpenseCents != 4000 || len(got.Categories) != 1 {
+		t.Fatalf("expected only the queried month, got %+v", got)
+	}
+
+	for _, bad := range []string{"/summary?year=2026", "/summary?month=8", "/summary?year=2026&month=13"} {
+		badReq, err := http.NewRequest(http.MethodGet, bad, nil)
+		if err != nil {
+			t.Fatalf("request: %v", err)
+		}
+		badReq.AddCookie(cookie)
+		badResp, err := app.Test(badReq)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if badResp.StatusCode != http.StatusBadRequest {
+			t.Fatalf("%s: expected status %d, got %d", bad, http.StatusBadRequest, badResp.StatusCode)
+		}
+	}
+}
+
 func TestSummaryOmitsUndonePurchase(t *testing.T) {
 	app := newTestApp(t)
 	cookie := loginCookie(t, app)

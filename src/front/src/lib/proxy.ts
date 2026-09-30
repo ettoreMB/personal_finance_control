@@ -25,11 +25,17 @@ export async function proxyToApi(
   });
 
   const responseBody = await apiResponse.text();
-  const response = new Response(responseBody, {
+  // 204, 205 and 304 reject any body, including the empty string from text().
+  const nullBody =
+    apiResponse.status === 204 ||
+    apiResponse.status === 205 ||
+    apiResponse.status === 304;
+  const response = new Response(nullBody ? null : responseBody, {
     status: apiResponse.status,
-    headers: responseBody
-      ? { "Content-Type": "application/json" }
-      : undefined,
+    headers:
+      !nullBody && responseBody
+        ? { "Content-Type": "application/json" }
+        : undefined,
   });
 
   for (const setCookie of apiResponse.headers.getSetCookie()) {

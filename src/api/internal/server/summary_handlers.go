@@ -2,6 +2,7 @@ package server
 
 import (
 	"sort"
+	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -32,10 +33,34 @@ type summaryResponse struct {
 	Categories   []summaryCategoryResponse `json:"categories"`
 }
 
-func summaryHandler(db *gorm.DB) fiber.Handler {
-	return func(c *fiber.Ctx) error {
+func summaryPeriod(c *fiber.Ctx) (int, time.Month, error) {
+	yearRaw := c.Query("year")
+	monthRaw := c.Query("month")
+	if yearRaw == "" && monthRaw == "" {
 		today := ledger.TodayCivil()
 		year, month, _ := today.Date()
+		return year, month, nil
+	}
+	if yearRaw == "" || monthRaw == "" {
+		return 0, 0, fiber.NewError(fiber.StatusBadRequest, "year and month are required together")
+	}
+	year, err := strconv.Atoi(yearRaw)
+	if err != nil || year < 1 || year > 9999 {
+		return 0, 0, fiber.NewError(fiber.StatusBadRequest, "invalid year")
+	}
+	month, err := strconv.Atoi(monthRaw)
+	if err != nil || month < 1 || month > 12 {
+		return 0, 0, fiber.NewError(fiber.StatusBadRequest, "invalid month")
+	}
+	return year, time.Month(month), nil
+}
+
+func summaryHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		year, month, err := summaryPeriod(c)
+		if err != nil {
+			return err
+		}
 		start := time.Date(year, month, 1, 0, 0, 0, 0, time.UTC)
 		end := start.AddDate(0, 1, 0)
 
