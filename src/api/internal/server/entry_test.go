@@ -12,6 +12,7 @@ type entryPayload struct {
 	Type        string `json:"type"`
 	AmountCents int    `json:"amount_cents"`
 	EntryDate   string `json:"entry_date"`
+	Description string `json:"description,omitempty"`
 	CategoryID  uint   `json:"category_id"`
 }
 
@@ -20,6 +21,7 @@ type entryResponse struct {
 	Type        string `json:"type"`
 	AmountCents int    `json:"amount_cents"`
 	EntryDate   string `json:"entry_date"`
+	Description string `json:"description"`
 	CategoryID  uint   `json:"category_id"`
 	Category    *struct {
 		ID   uint   `json:"id"`
@@ -164,6 +166,79 @@ func TestCreateExpenseAndIncome(t *testing.T) {
 	}
 }
 
+func TestCreateEntryDescriptionIsOptionalAndTrimmed(t *testing.T) {
+	app := newTestApp(t)
+	cookie := loginCookie(t, app)
+	categoryID := casaCategoryID(t, app, cookie)
+
+	blank := doCreateEntry(t, app, cookie, entryPayload{
+		Type:        "expense",
+		AmountCents: 100,
+		EntryDate:   "2026-03-01",
+		CategoryID:  categoryID,
+	})
+	if blank.StatusCode != http.StatusCreated {
+		t.Fatalf("expected blank description to be accepted, got %d", blank.StatusCode)
+	}
+	var created entryResponse
+	if err := json.NewDecoder(blank.Body).Decode(&created); err != nil {
+		t.Fatalf("unexpected error decoding body: %v", err)
+	}
+	if created.Description != "" {
+		t.Fatalf("expected empty description, got %q", created.Description)
+	}
+
+	resp := doCreateEntry(t, app, cookie, entryPayload{
+		Type:        "expense",
+		AmountCents: 8000,
+		EntryDate:   "2026-03-02",
+		Description: "  água  ",
+		CategoryID:  categoryID,
+	})
+	if resp.StatusCode != http.StatusCreated {
+		t.Fatalf("expected status %d, got %d", http.StatusCreated, resp.StatusCode)
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&created); err != nil {
+		t.Fatalf("unexpected error decoding body: %v", err)
+	}
+	if created.Description != "água" {
+		t.Fatalf("expected trimmed description, got %q", created.Description)
+	}
+
+	resp = doPatchEntry(t, app, cookie, created.ID, map[string]any{"description": " luz "})
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected status %d, got %d", http.StatusOK, resp.StatusCode)
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&created); err != nil {
+		t.Fatalf("unexpected error decoding body: %v", err)
+	}
+	if created.Description != "luz" {
+		t.Fatalf("expected patched description, got %q", created.Description)
+	}
+
+	resp = doPatchEntry(t, app, cookie, created.ID, map[string]any{"amount_cents": 8100})
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected status %d, got %d", http.StatusOK, resp.StatusCode)
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&created); err != nil {
+		t.Fatalf("unexpected error decoding body: %v", err)
+	}
+	if created.Description != "luz" || created.AmountCents != 8100 {
+		t.Fatalf("expected description to stay when omitted, got %+v", created)
+	}
+
+	resp = doPatchEntry(t, app, cookie, created.ID, map[string]any{"description": "   "})
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected status %d, got %d", http.StatusOK, resp.StatusCode)
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&created); err != nil {
+		t.Fatalf("unexpected error decoding body: %v", err)
+	}
+	if created.Description != "" {
+		t.Fatalf("expected cleared description, got %q", created.Description)
+	}
+}
+
 func TestCreateEntryPastAndFutureDates(t *testing.T) {
 	app := newTestApp(t)
 	cookie := loginCookie(t, app)
@@ -195,9 +270,9 @@ func TestCreateEntryValidation(t *testing.T) {
 	}
 
 	cases := []struct {
-		name    string
-		mutate  func(*entryPayload)
-		status  int
+		name   string
+		mutate func(*entryPayload)
+		status int
 	}{
 		{"zero amount", func(p *entryPayload) { p.AmountCents = 0 }, http.StatusBadRequest},
 		{"negative amount", func(p *entryPayload) { p.AmountCents = -1 }, http.StatusBadRequest},

@@ -1,0 +1,1 @@
+ALTER TABLE entries ADD COLUMN description TEXT NOT NULL DEFAULT '';

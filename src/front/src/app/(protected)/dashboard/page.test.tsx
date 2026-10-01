@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import DashboardPage from "./page";
@@ -56,8 +56,9 @@ describe("DashboardPage", () => {
     await waitFor(() => {
       expect(screen.getByText(/setembro de 2026/i)).toBeInTheDocument();
     });
-    expect(screen.getByText(/ganhos/i)).toBeInTheDocument();
-    expect(screen.getByText(/gastos/i)).toBeInTheDocument();
+    expect(screen.getByText(/nenhum gasto neste mês/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/ganhos/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/gastos/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("R$ 0,00").length).toBeGreaterThanOrEqual(3);
     expect(screen.queryByText(/casa/i)).not.toBeInTheDocument();
   });
@@ -88,11 +89,52 @@ describe("DashboardPage", () => {
     render(<DashboardPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("casa")).toBeInTheDocument();
+      expect(screen.getAllByText("casa").length).toBeGreaterThanOrEqual(1);
     });
-    expect(screen.getByText("comida")).toBeInTheDocument();
-    expect(screen.getByText("R$ 150,00")).toBeInTheDocument();
+    expect(screen.getByText("Gastos por categoria")).toBeInTheDocument();
+    expect(screen.getByText("Participação")).toBeInTheDocument();
+    expect(screen.getAllByText("comida").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("R$ 150,00").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("R$ -50,00")).toBeInTheDocument();
     expect(screen.getAllByText("R$ 100,00").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText(/2 categorias com gasto/i)).toBeInTheDocument();
+    expect(screen.getByLabelText("Mês")).toHaveValue("2026-09");
+  });
+
+  it("reloads the summary when another month is chosen", async () => {
+    const august = {
+      ...emptySummary,
+      period: { kind: "month", year: 2026, month: 8 },
+      expense_cents: 2500,
+    };
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url === "/api/summary") {
+        return new Response(JSON.stringify(emptySummary), { status: 200 });
+      }
+      if (url === "/api/summary?year=2026&month=8") {
+        return new Response(JSON.stringify(august), { status: 200 });
+      }
+      return new Response(null, { status: 404 });
+    });
+
+    render(<DashboardPage />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Mês")).toHaveValue("2026-09");
+    });
+
+    fireEvent.change(screen.getByLabelText("Mês"), {
+      target: { value: "2026-08" },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/agosto de 2026/i)).toBeInTheDocument();
+    });
+    expect(screen.getByText("R$ 25,00")).toBeInTheDocument();
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/summary?year=2026&month=8",
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
   });
 });
