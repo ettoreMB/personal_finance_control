@@ -12,6 +12,10 @@ _Avoid_: transação, movimento, entry, registro financeiro
 Lançamento que não pertence a uma Compra. Edição e exclusão são livres a qualquer momento; não existe mês fechado. Gasto no cartão em 1x é isto, não Compra.
 _Avoid_: lançamento simples, avulsa como tipo no banco
 
+**Rascunho**:
+Proposta de um lançamento avulso que ainda não está no livro. Existe no máximo um. Uma mensagem nova substitui o anterior. Só vira lançamento quando o usuário confirma. A descrição é o texto integral da mensagem, sem reescrever.
+_Avoid_: lançamento pendente, pré-lançamento, draft
+
 **Compra**:
 Uma compra parcelada: descrição obrigatória, data (passada, hoje ou futura), valor total, N parcelas (2 a 24) e categoria. Gera N parcelas na criação; prazo (N e data) é fixo; valor total pode ser redistribuído só no que ainda não passou. Não existe compra à vista, Cartão nem Fatura. Desfeita some das listas; terminada (todas as parcelas no passado) continua visível.
 _Avoid_: purchase, pedido, parcelamento como entidade, fatura, cartão

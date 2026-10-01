@@ -1,18 +1,31 @@
 package server
 
 import (
+	"time"
+
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 
 	"github.com/ettoreMB/personal_finance_control/api/internal/config"
+	"github.com/ettoreMB/personal_finance_control/api/internal/whatsapp"
 )
 
 func New(db *gorm.DB, cfg config.Config) *fiber.App {
+	return NewWith(db, cfg, Dependencies{
+		Sender:     whatsapp.NewEvolutionSender(cfg.EvolutionBaseURL, cfg.EvolutionAPIKey, cfg.EvolutionInstanceID),
+		Classifier: whatsapp.NewJevClassifier(cfg.JevAPIKey, cfg.JevModel),
+		Now:        time.Now,
+	})
+}
+
+func NewWith(db *gorm.DB, cfg config.Config, deps Dependencies) *fiber.App {
 	app := fiber.New()
 
 	app.Get("/healthz", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"status": "ok"})
 	})
+
+	app.Post("/webhooks/whatsapp", whatsappWebhook(db, cfg, deps))
 
 	app.Post("/register", registerHandler(db))
 	app.Post("/login", loginHandler(db, cfg))
